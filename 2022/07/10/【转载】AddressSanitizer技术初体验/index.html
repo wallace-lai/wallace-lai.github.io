@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="wallace-lai">
+    
+    <title>
+        
+            【转载】AddressSanitizer技术初体验 |
+        
+        wallace-lai&#39;s pages
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <link rel="shortcut icon" href="/images/mylogo.svg">
+    
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+
+    <script id="hexo-configurations">
+    let KEEP = window.KEEP || {};
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN"};
+    KEEP.theme_config = {"toc":{"enable":true,"number":false,"expand_all":false,"init_open":false},"style":{"primary_color":"#3366FF","avatar":"/images/mylogo.svg","favicon":"/images/mylogo.svg","article_img_align":"center","left_side_width":"260px","content_max_width":"920px","hover":{"shadow":false,"scale":false},"first_screen":{"enable":true,"background_img":"/images/bg.svg","description":"Keep Moving and Keep Loving"},"scroll":{"progress_bar":{"enable":false},"percent":{"enable":false}}},"local_search":{"enable":false,"preload":false},"code_copy":{"enable":false,"style":"default"},"pjax":{"enable":false},"lazyload":{"enable":true},"version":"3.4.5"};
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+  </script>
+<meta name="generator" content="Hexo 6.1.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+
+    
+</div>
+
+
+<main class="page-container">
+
+    
+
+    <div class="page-main-content">
+
+        <div class="page-main-content-top">
+            <header class="header-wrapper">
+
+    <div class="header-content">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                wallace-lai&#39;s pages
+            </a>
+        </div>
+
+        <div class="right">
+            <div class="pc">
+                <ul class="menu-list">
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/"
+                            >
+                                首页
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/archives"
+                            >
+                                归档
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/categories"
+                            >
+                                分类
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/tags"
+                            >
+                                标签
+                            </a>
+                        </li>
+                    
+                        <li class="menu-item">
+                            <a class=""
+                               href="/about"
+                            >
+                                关于
+                            </a>
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list">
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/">首页</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/archives">归档</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/categories">分类</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/tags">标签</a>
+                </li>
+            
+                <li class="drawer-menu-item flex-center">
+                    <a class=""
+                       href="/about">关于</a>
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle">
+
+            <div class="main-content">
+
+                
+                    <div class="fade-in-down-animation">
+    <div class="article-content-container">
+
+        <div class="article-title">
+            <span class="title-hover-animation">【转载】AddressSanitizer技术初体验</span>
+        </div>
+
+        
+            <div class="article-header">
+                <div class="avatar">
+                    <img src="/images/mylogo.svg">
+                </div>
+                <div class="info">
+                    <div class="author">
+                        <span class="name">wallace-lai</span>
+                        
+                    </div>
+                    <div class="meta-info">
+                        <div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fas fa-edit"></i>&nbsp;
+        <span class="pc">2022-07-10 15:22:31</span>
+        <span class="mobile">2022-07-10 15:22</span>
+    </span>
+    
+        <span class="article-categories article-meta-item">
+            <i class="fas fa-folder"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/categories/asan/">asan</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        &gt; <a href="/categories/%E8%BD%AC%E8%BD%BD/">转载</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fas fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/asan/">asan</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fas fa-file-word"></i>&nbsp;<span>4k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fas fa-clock"></i>&nbsp;<span>22 分钟</span>
+        </span>
+    
+    
+</div>
+
+                    </div>
+                </div>
+            </div>
+        
+
+        <div class="article-content markdown-body">
+            <blockquote>
+<p>背景：最近在公司上代码跑门禁的过程中，遇到了个别用例被asan检测出use-after-free的错误。由于看不懂asan的报错信息，特意学习了一下asan的用法。希望下次再遇到asan报错可以更快地定位处代码问题所在。</p>
+</blockquote>
+<p>原文：<a class="link" target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/537962479?utm_oi=59563365629952">AddressSanitizer 技术初体验<i class="fas fa-external-link-alt"></i></a></p>
+<p>注意：对原文有删改</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a><strong>简介</strong></h2><p>AddressSanitizer 是 Google 开发的一款用于检测内存访问错误的工具，用于解决 use-after-free 和内存泄漏的相关问题。它内置在 GCC 版本 &gt;= 4.8 中，适用于 C 和 C++ 代码。AddressSanitizer 可在使用运行时检测跟踪内存分配，这意味着必须使用 AddressSanitizer 构建代码才能利用它的功能。</p>
+<p>因为内存泄漏会增加程序使用的总内存，所以当不再需要内存时，正确释放内存很重要。或许对于小程序，丢失几个字节似乎没什么大不了的，但是对于使用大量内存的长时间运行的程序，避免内存泄漏变得越来越重要。如果程序不再需要它时，无法释放使用的内存，很可能会耗尽内存，从而导致应用程序提前终止。AddressSanitizer 的出现，就可以帮助检测这些内存泄漏。</p>
+<p>此外，AddressSanitizer 可以检测 use-after-free 错误。当程序尝试读取或写入已被释放的内存时，会发生释放后使用错误。这是未定义的行为，可能会导致数据损坏、结果不正确，甚至程序崩溃。</p>
+<p>如果检测到错误，程序将向 stderr 打印错误消息，并以非零退出代码退出，若是使用 AddressSanitizer，那么它在第一个检测到的错误时就退出。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a><strong>使用</strong></h2><p>编译选项：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-fsanitize=address		# 告诉编译器需要启用AddressSanitizer</span><br><span class="line">-fno-omit-frame-pointer # 显示详细的调用栈信息</span><br></pre></td></tr></tbody></table></figure>
+
+<p>链接选项：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-fsanitize=address		# 是的，编译的时候也需要该标记</span><br></pre></td></tr></tbody></table></figure>
+
+<p>针对个别函数跳过asan分析：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__attribute__((no_sanitize_address))	# 函数声明时带上该属性</span><br></pre></td></tr></tbody></table></figure>
+
+<p>ASAN_OPTIONS是Address-Sanitizier的运行选项环境变量：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">halt_on_error			# 检测内存错误后继续运行</span><br><span class="line">detect_leaks			# 使能内存泄漏检测</span><br><span class="line">detect_stack_use_after_return	# 开启stack_use_after_return检查</span><br><span class="line">...</span><br></pre></td></tr></tbody></table></figure>
+
+
+
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a><strong>原理</strong></h2><p>原理请参考这篇文章</p>
+<p><a class="link" target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/382994002">工欲善其事必先利其器——AddressSanitizer<i class="fas fa-external-link-alt"></i></a></p>
+<h2 id="错误类型"><a href="#错误类型" class="headerlink" title="错误类型"></a><strong>错误类型</strong></h2><p><strong>1. Use after free</strong></p>
+<p>内存释放后还被使用。</p>
+<p><strong>案例1</strong></p>
+<figure class="highlight c++"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="type">int</span> *arr = <span class="keyword">new</span> <span class="type">int</span>[<span class="number">100</span>];</span><br><span class="line">    <span class="keyword">delete</span> [] arr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> arr[argc];</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">~/tmp$ g++ -g -fsanitize=address -fno-omit-frame-pointer use_after_free.cpp -o main</span><br><span class="line">~/tmp$ ./main</span><br><span class="line">=================================================================</span><br><span class="line">==139==ERROR: AddressSanitizer: heap-use-after-free on address 0x614000000044 at pc 0x556218448cb1 bp 0x7ffc9618fd80 sp 0x7ffc9618fd70</span><br><span class="line">READ of size 4 at 0x614000000044 thread T0</span><br><span class="line">    <span class="comment">#0 0x556218448cb0 in main /tmp/use_after_free.cpp:10</span></span><br><span class="line">    <span class="comment">#1 0x7f0c1692ac86 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21c86)</span></span><br><span class="line">    <span class="comment">#2 0x556218448b79 in _start (/tmp/main+0xb79)</span></span><br><span class="line"></span><br><span class="line">0x614000000044 is located 4 bytes inside of 400-byte region [0x614000000040,0x6140000001d0)</span><br><span class="line">freed by thread T0 here:</span><br><span class="line">    <span class="comment">#0 0x7f0c177cbaef in operator delete[](void*) (/usr/lib/x86_64-linux-gnu/libasan.so.5+0x10eaef)</span></span><br><span class="line">    <span class="comment">#1 0x556218448c64 in main /tmp/use_after_free.cpp:8</span></span><br><span class="line">    <span class="comment">#2 0x7f0c1692ac86 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21c86)</span></span><br><span class="line"></span><br><span class="line">previously allocated by thread T0 here:</span><br><span class="line">    <span class="comment">#0 0x7f0c177cab9f in operator new[](unsigned long) (/usr/lib/x86_64-linux-gnu/libasan.so.5+0x10db9f)</span></span><br><span class="line">    <span class="comment">#1 0x556218448c4d in main /tmp/use_after_free.cpp:7</span></span><br><span class="line">    <span class="comment">#2 0x7f0c1692ac86 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21c86)</span></span><br><span class="line"></span><br><span class="line">SUMMARY: AddressSanitizer: heap-use-after-free /tmp/use_after_free.cpp:10 <span class="keyword">in</span> main</span><br><span class="line">Shadow bytes around the buggy address:</span><br><span class="line">  0x0c287fff7fb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0c287fff7fc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0c287fff7fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0c287fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0c287fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">=&gt;0x0c287fff8000: fa fa fa fa fa fa fa fa[fd]fd fd fd fd fd fd fd</span><br><span class="line">  0x0c287fff8010: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd</span><br><span class="line">  0x0c287fff8020: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd</span><br><span class="line">  0x0c287fff8030: fd fd fd fd fd fd fd fd fd fd fa fa fa fa fa fa</span><br><span class="line">  0x0c287fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">  0x0c287fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">Shadow byte legend (one shadow byte represents 8 application bytes):</span><br><span class="line">  Addressable:           00</span><br><span class="line">  Partially addressable: 01 02 03 04 05 06 07</span><br><span class="line">  Heap left redzone:       fa</span><br><span class="line">  Freed heap region:       fd</span><br><span class="line">  Stack left redzone:      f1</span><br><span class="line">  Stack mid redzone:       f2</span><br><span class="line">  Stack right redzone:     f3</span><br><span class="line">  Stack after <span class="built_in">return</span>:      f5</span><br><span class="line">  Stack use after scope:   f8</span><br><span class="line">  Global redzone:          f9</span><br><span class="line">  Global init order:       f6</span><br><span class="line">  Poisoned by user:        f7</span><br><span class="line">  Container overflow:      <span class="built_in">fc</span></span><br><span class="line">  Array cookie:            ac</span><br><span class="line">  Intra object redzone:    bb</span><br><span class="line">  ASan internal:           fe</span><br><span class="line">  Left alloca redzone:     ca</span><br><span class="line">  Right alloca redzone:    cb</span><br><span class="line">  Shadow gap:              cc</span><br><span class="line">==139==ABORTING</span><br></pre></td></tr></tbody></table></figure>
+
+<p><strong>2. Heap buffer overflow</strong></p>
+<p>申请了堆空间，数组下标超出申请范围。</p>
+<p><strong>案例1</strong></p>
+<figure class="highlight c++"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="type">int</span> *arr = <span class="keyword">new</span> <span class="type">int</span>[<span class="number">100</span>];</span><br><span class="line">    arr[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> res = arr[argc + <span class="number">100</span>];</span><br><span class="line">    <span class="keyword">delete</span> [] arr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">~/tmp$ g++ -g -fsanitize=address -fno-omit-frame-pointer heap_buffer_overflow.cpp -o main</span><br><span class="line">~/tmp$ ./main</span><br><span class="line">=================================================================</span><br><span class="line">==163==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6140000001d4 at pc 0x560f62792d43 bp 0x7fff5265c250 sp 0x7fff5265c240</span><br><span class="line">READ of size 4 at 0x6140000001d4 thread T0</span><br><span class="line">    <span class="comment">#0 0x560f62792d42 in main /tmp/heap_buffer_overflow.cpp:8</span></span><br><span class="line">    <span class="comment">#1 0x7f3318e2fc86 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21c86)</span></span><br><span class="line">    <span class="comment">#2 0x560f62792bd9 in _start (/tmp/main+0xbd9)</span></span><br><span class="line"></span><br><span class="line">0x6140000001d4 is located 4 bytes to the right of 400-byte region [0x614000000040,0x6140000001d0)</span><br><span class="line">allocated by thread T0 here:</span><br><span class="line">    <span class="comment">#0 0x7f3319ccfb9f in operator new[](unsigned long) (/usr/lib/x86_64-linux-gnu/libasan.so.5+0x10db9f)</span></span><br><span class="line">    <span class="comment">#1 0x560f62792cad in main /tmp/heap_buffer_overflow.cpp:6</span></span><br><span class="line">    <span class="comment">#2 0x7f3318e2fc86 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21c86)</span></span><br><span class="line"></span><br><span class="line">SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/heap_buffer_overflow.cpp:8 <span class="keyword">in</span> main</span><br><span class="line">Shadow bytes around the buggy address:</span><br><span class="line">  0x0c287fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0c287fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0c287fff8000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0c287fff8010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0c287fff8020: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">=&gt;0x0c287fff8030: 00 00 00 00 00 00 00 00 00 00[fa]fa fa fa fa fa</span><br><span class="line">  0x0c287fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">  0x0c287fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">  0x0c287fff8060: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">  0x0c287fff8070: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">  0x0c287fff8080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">Shadow byte legend (one shadow byte represents 8 application bytes):</span><br><span class="line">  Addressable:           00</span><br><span class="line">  Partially addressable: 01 02 03 04 05 06 07</span><br><span class="line">  Heap left redzone:       fa</span><br><span class="line">  Freed heap region:       fd</span><br><span class="line">  Stack left redzone:      f1</span><br><span class="line">  Stack mid redzone:       f2</span><br><span class="line">  Stack right redzone:     f3</span><br><span class="line">  Stack after <span class="built_in">return</span>:      f5</span><br><span class="line">  Stack use after scope:   f8</span><br><span class="line">  Global redzone:          f9</span><br><span class="line">  Global init order:       f6</span><br><span class="line">  Poisoned by user:        f7</span><br><span class="line">  Container overflow:      <span class="built_in">fc</span></span><br><span class="line">  Array cookie:            ac</span><br><span class="line">  Intra object redzone:    bb</span><br><span class="line">  ASan internal:           fe</span><br><span class="line">  Left alloca redzone:     ca</span><br><span class="line">  Right alloca redzone:    cb</span><br><span class="line">  Shadow gap:              cc</span><br><span class="line">==163==ABORTING</span><br></pre></td></tr></tbody></table></figure>
+
+<p><strong>案例2</strong></p>
+<figure class="highlight c++"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstdlib&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="type">char</span> *p = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    p = (<span class="type">char</span> *)<span class="built_in">malloc</span>(<span class="number">16</span>);</span><br><span class="line">    p[<span class="number">17</span>] = <span class="number">12</span>;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">free</span>(p);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">=================================================================</span><br><span class="line">==320==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x602000000021 at pc 0x5596ba558c96 bp 0x7ffe683a35e0 sp 0x7ffe683a35d0</span><br><span class="line">WRITE of size 1 at 0x602000000021 thread T0</span><br><span class="line">    <span class="comment">#0 0x5596ba558c95 in main /tmp/heap_buffer_overflow2.cpp:10</span></span><br><span class="line">    <span class="comment">#1 0x7fa813a7bc86 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21c86)</span></span><br><span class="line">    <span class="comment">#2 0x5596ba558b79 in _start (/tmp/main+0xb79)</span></span><br><span class="line"></span><br><span class="line">0x602000000021 is located 1 bytes to the right of 16-byte region [0x602000000010,0x602000000020)</span><br><span class="line">allocated by thread T0 here:</span><br><span class="line">    <span class="comment">#0 0x7fa814919c68 in __interceptor_malloc (/usr/lib/x86_64-linux-gnu/libasan.so.5+0x10bc68)</span></span><br><span class="line">    <span class="comment">#1 0x5596ba558c55 in main /tmp/heap_buffer_overflow2.cpp:9</span></span><br><span class="line">    <span class="comment">#2 0x7fa813a7bc86 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21c86)</span></span><br><span class="line"></span><br><span class="line">SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/heap_buffer_overflow2.cpp:10 <span class="keyword">in</span> main</span><br><span class="line">Shadow bytes around the buggy address:</span><br><span class="line">  0x0c047fff7fb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0c047fff7fc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0c047fff7fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0c047fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0c047fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">=&gt;0x0c047fff8000: fa fa 00 00[fa]fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">  0x0c047fff8010: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">  0x0c047fff8020: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">  0x0c047fff8030: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">  0x0c047fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">  0x0c047fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa</span><br><span class="line">Shadow byte legend (one shadow byte represents 8 application bytes):</span><br><span class="line">  Addressable:           00</span><br><span class="line">  Partially addressable: 01 02 03 04 05 06 07</span><br><span class="line">  Heap left redzone:       fa</span><br><span class="line">  Freed heap region:       fd</span><br><span class="line">  Stack left redzone:      f1</span><br><span class="line">  Stack mid redzone:       f2</span><br><span class="line">  Stack right redzone:     f3</span><br><span class="line">  Stack after <span class="built_in">return</span>:      f5</span><br><span class="line">  Stack use after scope:   f8</span><br><span class="line">  Global redzone:          f9</span><br><span class="line">  Global init order:       f6</span><br><span class="line">  Poisoned by user:        f7</span><br><span class="line">  Container overflow:      <span class="built_in">fc</span></span><br><span class="line">  Array cookie:            ac</span><br><span class="line">  Intra object redzone:    bb</span><br><span class="line">  ASan internal:           fe</span><br><span class="line">  Left alloca redzone:     ca</span><br><span class="line">  Right alloca redzone:    cb</span><br><span class="line">  Shadow gap:              cc</span><br><span class="line">==320==ABORTING</span><br></pre></td></tr></tbody></table></figure>
+
+<p>第2行告诉我们程序试图在0x602000000021处写入1个字节的时候发生了缓冲区溢出，写入的行为发生在源文件的第10行</p>
+<p>第8行告诉我们0x602000000021位于内存区域[0x602000000010,0x602000000020)的右侧的1字节处，内存区域的申请发生在源文件的第9行</p>
+<p>第14行是重点。根据shadow mem和mem的映射关系shadow = (mem &gt;&gt; 3) + 0x7FFF8000，可知0x602000000021对应的shadow mem地址为0xc047fff8004。而0xc047fff8004处的shadow mem值为0xFA，是个负数，表明是不可访问的。</p>
+<p><strong>3. Stack buffer overflow</strong></p>
+<p>局部变量，数组下标超出范围。</p>
+<figure class="highlight c++"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="type">int</span> stack_arr[<span class="number">100</span>];</span><br><span class="line">    stack_arr[<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> stack_arr[argc + <span class="number">100</span>];</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+
+<figure class="highlight c++"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">~/tmp$ g++ -g -fsanitize=address -fno-omit-frame-pointer stack_buffer_overflow.cpp -o main</span><br><span class="line">~/tmp$ ./main</span><br><span class="line">=================================================================</span><br><span class="line">==<span class="number">178</span>==ERROR: AddressSanitizer: stack-buffer-overflow on address <span class="number">0x7ffd340f74a4</span> at pc <span class="number">0x558b35676e6c</span> bp <span class="number">0x7ffd340f72c0</span> sp <span class="number">0x7ffd340f72b0</span></span><br><span class="line">READ of size <span class="number">4</span> at <span class="number">0x7ffd340f74a4</span> thread T0</span><br><span class="line">    #<span class="number">0</span> <span class="number">0x558b35676e6b</span> in main /tmp/stack_buffer_overflow.cpp:<span class="number">8</span></span><br><span class="line">    #<span class="number">1</span> <span class="number">0x7f4ea3bc5c86</span> in __libc_start_main (/lib/x86_64-linux-gnu/libc.so<span class="number">.6</span>+<span class="number">0x21c86</span>)</span><br><span class="line">    #<span class="number">2</span> <span class="number">0x558b35676c69</span> in _start (/tmp/main+<span class="number">0xc69</span>)</span><br><span class="line"></span><br><span class="line">Address <span class="number">0x7ffd340f74a4</span> is located in stack of thread T0 at offset <span class="number">452</span> in frame</span><br><span class="line">    #<span class="number">0</span> <span class="number">0x558b35676d34</span> in main /tmp/stack_buffer_overflow.cpp:<span class="number">5</span></span><br><span class="line"></span><br><span class="line">  This frame has <span class="number">1</span> <span class="built_in">object</span>(s):</span><br><span class="line">    [<span class="number">48</span>, <span class="number">448</span>) <span class="string">'stack_arr'</span> (line <span class="number">6</span>) &lt;== Memory access at offset <span class="number">452</span> overflows <span class="keyword">this</span> variable</span><br><span class="line">HINT: <span class="keyword">this</span> may be a <span class="literal">false</span> positive <span class="keyword">if</span> your program uses some custom stack unwind mechanism, swapcontext <span class="keyword">or</span> <span class="built_in">vfork</span></span><br><span class="line">      (longjmp <span class="keyword">and</span> C++ exceptions *are* supported)</span><br><span class="line">SUMMARY: AddressSanitizer: stack-buffer-overflow /tmp/stack_buffer_overflow.cpp:<span class="number">8</span> in main</span><br><span class="line">Shadow bytes around the buggy address:</span><br><span class="line">  <span class="number">0x100026816e40</span>: <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span></span><br><span class="line">  <span class="number">0x100026816e50</span>: <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> f1 f1 f1 f1</span><br><span class="line">  <span class="number">0x100026816e60</span>: f1 f1 <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span></span><br><span class="line">  <span class="number">0x100026816e70</span>: <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span></span><br><span class="line">  <span class="number">0x100026816e80</span>: <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span></span><br><span class="line">=&gt;<span class="number">0x100026816e90</span>: <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>[f3]f3 f3 f3 f3 f3 f3 f3 <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span></span><br><span class="line">  <span class="number">0x100026816ea0</span>: <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span></span><br><span class="line">  <span class="number">0x100026816eb0</span>: <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span></span><br><span class="line">  <span class="number">0x100026816ec0</span>: <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span></span><br><span class="line">  <span class="number">0x100026816ed0</span>: <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span></span><br><span class="line">  <span class="number">0x100026816ee0</span>: <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span></span><br><span class="line">Shadow byte <span class="built_in">legend</span> (one shadow byte represents <span class="number">8</span> application bytes):</span><br><span class="line">  Addressable:           <span class="number">00</span></span><br><span class="line">  Partially addressable: <span class="number">01</span> <span class="number">02</span> <span class="number">03</span> <span class="number">04</span> <span class="number">05</span> <span class="number">06</span> <span class="number">07</span></span><br><span class="line">  Heap left redzone:       fa</span><br><span class="line">  Freed heap region:       fd</span><br><span class="line">  Stack left redzone:      f1</span><br><span class="line">  Stack mid redzone:       f2</span><br><span class="line">  Stack right redzone:     f3</span><br><span class="line">  Stack after <span class="keyword">return</span>:      f5</span><br><span class="line">  Stack use after scope:   f8</span><br><span class="line">  Global redzone:          f9</span><br><span class="line">  Global init order:       f6</span><br><span class="line">  Poisoned by user:        f7</span><br><span class="line">  Container overflow:      fc</span><br><span class="line">  Array cookie:            ac</span><br><span class="line">  Intra object redzone:    bb</span><br><span class="line">  ASan internal:           fe</span><br><span class="line">  Left alloca redzone:     ca</span><br><span class="line">  Right alloca redzone:    cb</span><br><span class="line">  Shadow gap:              cc</span><br><span class="line">==<span class="number">178</span>==ABORTING</span><br></pre></td></tr></tbody></table></figure>
+
+<p><strong>4. Global buffer overflow</strong></p>
+<p>全局变量，数组下标超出范围。</p>
+<figure class="highlight c++"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> global_arr[<span class="number">100</span>] = {<span class="number">-1</span>};</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="keyword">return</span> global_arr[argc + <span class="number">100</span>];</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">~/tmp$ g++ -g -fsanitize=address -fno-omit-frame-pointer global_buffer_overflow.cpp -o main</span><br><span class="line">~/tmp$ ./main</span><br><span class="line">=================================================================</span><br><span class="line">==192==ERROR: AddressSanitizer: global-buffer-overflow on address 0x5594e913a1b4 at pc 0x5594e8f38c93 bp 0x7ffe65f73e10 sp 0x7ffe65f73e00</span><br><span class="line">READ of size 4 at 0x5594e913a1b4 thread T0</span><br><span class="line">    <span class="comment">#0 0x5594e8f38c92 in main /tmp/global_buffer_overflow.cpp:6</span></span><br><span class="line">    <span class="comment">#1 0x7f666e041c86 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21c86)</span></span><br><span class="line">    <span class="comment">#2 0x5594e8f38b79 in _start (/tmp/main+0xb79)</span></span><br><span class="line"></span><br><span class="line">0x5594e913a1b4 is located 4 bytes to the right of global variable <span class="string">'global_arr'</span> defined <span class="keyword">in</span> <span class="string">'global_buffer_overflow.cpp:3:5'</span> (0x5594e913a020) of size 400</span><br><span class="line">SUMMARY: AddressSanitizer: global-buffer-overflow /tmp/global_buffer_overflow.cpp:6 <span class="keyword">in</span> main</span><br><span class="line">Shadow bytes around the buggy address:</span><br><span class="line">  0x0ab31d21f3e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0ab31d21f3f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0ab31d21f400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0ab31d21f410: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0ab31d21f420: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">=&gt;0x0ab31d21f430: 00 00 00 00 00 00[f9]f9 f9 f9 f9 f9 00 00 00 00</span><br><span class="line">  0x0ab31d21f440: 00 00 00 00 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9</span><br><span class="line">  0x0ab31d21f450: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 00 00 00 00</span><br><span class="line">  0x0ab31d21f460: 01 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0ab31d21f470: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0ab31d21f480: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">Shadow byte legend (one shadow byte represents 8 application bytes):</span><br><span class="line">  Addressable:           00</span><br><span class="line">  Partially addressable: 01 02 03 04 05 06 07</span><br><span class="line">  Heap left redzone:       fa</span><br><span class="line">  Freed heap region:       fd</span><br><span class="line">  Stack left redzone:      f1</span><br><span class="line">  Stack mid redzone:       f2</span><br><span class="line">  Stack right redzone:     f3</span><br><span class="line">  Stack after <span class="built_in">return</span>:      f5</span><br><span class="line">  Stack use after scope:   f8</span><br><span class="line">  Global redzone:          f9</span><br><span class="line">  Global init order:       f6</span><br><span class="line">  Poisoned by user:        f7</span><br><span class="line">  Container overflow:      <span class="built_in">fc</span></span><br><span class="line">  Array cookie:            ac</span><br><span class="line">  Intra object redzone:    bb</span><br><span class="line">  ASan internal:           fe</span><br><span class="line">  Left alloca redzone:     ca</span><br><span class="line">  Right alloca redzone:    cb</span><br><span class="line">  Shadow gap:              cc</span><br><span class="line">==192==ABORTING</span><br></pre></td></tr></tbody></table></figure>
+
+<p><strong>5. Use after return</strong></p>
+<p>指针指向了一个函数的局部变量，函数返回后局部变量失效，但使用了该指针。</p>
+<figure class="highlight c++"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> *ptr;</span><br><span class="line"></span><br><span class="line">__attribute__((noinline)) <span class="function"><span class="type">void</span> <span class="title">FunctionThatEscapeLocalObject</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="type">int</span> local[<span class="number">100</span>];</span><br><span class="line">    ptr = &amp;local[<span class="number">0</span>];</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    <span class="built_in">FunctionThatEscapeLocalObject</span>();</span><br><span class="line">    <span class="keyword">return</span> ptr[argc];</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">~/tmp$ <span class="built_in">export</span> ASAN_OPTIONS=detect_stack_use_after_return=1</span><br><span class="line">~/tmp$ g++ -g -fsanitize=address -fno-omit-frame-pointer user_after_return.cpp -o main</span><br><span class="line">~/tmp$ ./main</span><br><span class="line">=================================================================</span><br><span class="line">==222==ERROR: AddressSanitizer: stack-use-after-return on address 0x7fbc900be034 at pc 0x5583396bcc26 bp 0x7ffcc51d92e0 sp 0x7ffcc51d92d0</span><br><span class="line">READ of size 4 at 0x7fbc900be034 thread T0</span><br><span class="line">    <span class="comment">#0 0x5583396bcc25 in main /tmp/user_after_return.cpp:12</span></span><br><span class="line">    <span class="comment">#1 0x7fbc93a5cc86 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21c86)</span></span><br><span class="line">    <span class="comment">#2 0x5583396bc9c9 in _start (/tmp/main+0x9c9)</span></span><br><span class="line"></span><br><span class="line">Address 0x7fbc900be034 is located <span class="keyword">in</span> stack of thread T0 at offset 52 <span class="keyword">in</span> frame</span><br><span class="line">    <span class="comment">#0 0x5583396bca94 in FunctionThatEscapeLocalObject() /tmp/user_after_return.cpp:4</span></span><br><span class="line"></span><br><span class="line">  This frame has 1 object(s):</span><br><span class="line">    [48, 448) <span class="string">'local'</span> (line 5) &lt;== Memory access at offset 52 is inside this variable</span><br><span class="line">HINT: this may be a <span class="literal">false</span> positive <span class="keyword">if</span> your program uses some custom stack unwind mechanism, swapcontext or vfork</span><br><span class="line">      (longjmp and C++ exceptions *are* supported)</span><br><span class="line">SUMMARY: AddressSanitizer: stack-use-after-return /tmp/user_after_return.cpp:12 <span class="keyword">in</span> main</span><br><span class="line">Shadow bytes around the buggy address:</span><br><span class="line">  0x0ff81200fbb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0ff81200fbc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0ff81200fbd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0ff81200fbe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0ff81200fbf0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">=&gt;0x0ff81200fc00: f5 f5 f5 f5 f5 f5[f5]f5 f5 f5 f5 f5 f5 f5 f5 f5</span><br><span class="line">  0x0ff81200fc10: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5</span><br><span class="line">  0x0ff81200fc20: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5</span><br><span class="line">  0x0ff81200fc30: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5</span><br><span class="line">  0x0ff81200fc40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0ff81200fc50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">Shadow byte legend (one shadow byte represents 8 application bytes):</span><br><span class="line">  Addressable:           00</span><br><span class="line">  Partially addressable: 01 02 03 04 05 06 07</span><br><span class="line">  Heap left redzone:       fa</span><br><span class="line">  Freed heap region:       fd</span><br><span class="line">  Stack left redzone:      f1</span><br><span class="line">  Stack mid redzone:       f2</span><br><span class="line">  Stack right redzone:     f3</span><br><span class="line">  Stack after <span class="built_in">return</span>:      f5</span><br><span class="line">  Stack use after scope:   f8</span><br><span class="line">  Global redzone:          f9</span><br><span class="line">  Global init order:       f6</span><br><span class="line">  Poisoned by user:        f7</span><br><span class="line">  Container overflow:      <span class="built_in">fc</span></span><br><span class="line">  Array cookie:            ac</span><br><span class="line">  Intra object redzone:    bb</span><br><span class="line">  ASan internal:           fe</span><br><span class="line">  Left alloca redzone:     ca</span><br><span class="line">  Right alloca redzone:    cb</span><br><span class="line">  Shadow gap:              cc</span><br><span class="line">==222==ABORTING</span><br></pre></td></tr></tbody></table></figure>
+
+<p><strong>6. Use after scope</strong></p>
+<p>指针指向了一个范围变量，该范围退出后变量失效，但使用了该指针。</p>
+<figure class="highlight c++"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">volatile</span> <span class="type">int</span> *p = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    {</span><br><span class="line">        <span class="type">int</span> x = <span class="number">0</span>;</span><br><span class="line">        p = &amp;x;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    *p = <span class="number">5</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">~/tmp$ g++ -g -fsanitize=address -fno-omit-frame-pointer use_after_scope.cpp -o main</span><br><span class="line">~/tmp$ ./main</span><br><span class="line">=================================================================</span><br><span class="line">==238==ERROR: AddressSanitizer: stack-use-after-scope on address 0x7f404a01c020 at pc 0x562e72a10b99 bp 0x7ffd81c233b0 sp 0x7ffd81c233a0</span><br><span class="line">WRITE of size 4 at 0x7f404a01c020 thread T0</span><br><span class="line">    <span class="comment">#0 0x562e72a10b98 in main /tmp/use_after_scope.cpp:10</span></span><br><span class="line">    <span class="comment">#1 0x7f404dcbac86 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21c86)</span></span><br><span class="line">    <span class="comment">#2 0x562e72a109c9 in _start (/tmp/main+0x9c9)</span></span><br><span class="line"></span><br><span class="line">Address 0x7f404a01c020 is located <span class="keyword">in</span> stack of thread T0 at offset 32 <span class="keyword">in</span> frame</span><br><span class="line">    <span class="comment">#0 0x562e72a10a94 in main /tmp/use_after_scope.cpp:4</span></span><br><span class="line"></span><br><span class="line">  This frame has 1 object(s):</span><br><span class="line">    [32, 36) <span class="string">'x'</span> (line 6) &lt;== Memory access at offset 32 is inside this variable</span><br><span class="line">HINT: this may be a <span class="literal">false</span> positive <span class="keyword">if</span> your program uses some custom stack unwind mechanism, swapcontext or vfork</span><br><span class="line">      (longjmp and C++ exceptions *are* supported)</span><br><span class="line">SUMMARY: AddressSanitizer: stack-use-after-scope /tmp/use_after_scope.cpp:10 <span class="keyword">in</span> main</span><br><span class="line">Shadow bytes around the buggy address:</span><br><span class="line">  0x0fe8893fb7b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0fe8893fb7c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0fe8893fb7d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0fe8893fb7e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0fe8893fb7f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">=&gt;0x0fe8893fb800: f1 f1 f1 f1[f8]f3 f3 f3 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0fe8893fb810: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0fe8893fb820: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0fe8893fb830: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0fe8893fb840: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">  0x0fe8893fb850: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">Shadow byte legend (one shadow byte represents 8 application bytes):</span><br><span class="line">  Addressable:           00</span><br><span class="line">  Partially addressable: 01 02 03 04 05 06 07</span><br><span class="line">  Heap left redzone:       fa</span><br><span class="line">  Freed heap region:       fd</span><br><span class="line">  Stack left redzone:      f1</span><br><span class="line">  Stack mid redzone:       f2</span><br><span class="line">  Stack right redzone:     f3</span><br><span class="line">  Stack after <span class="built_in">return</span>:      f5</span><br><span class="line">  Stack use after scope:   f8</span><br><span class="line">  Global redzone:          f9</span><br><span class="line">  Global init order:       f6</span><br><span class="line">  Poisoned by user:        f7</span><br><span class="line">  Container overflow:      <span class="built_in">fc</span></span><br><span class="line">  Array cookie:            ac</span><br><span class="line">  Intra object redzone:    bb</span><br><span class="line">  ASan internal:           fe</span><br><span class="line">  Left alloca redzone:     ca</span><br><span class="line">  Right alloca redzone:    cb</span><br><span class="line">  Shadow gap:              cc</span><br><span class="line">==238==ABORTING</span><br></pre></td></tr></tbody></table></figure>
+
+<p><strong>7. Memory leaks</strong></p>
+<p>内存泄露，申请了未释放。</p>
+<figure class="highlight c++"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> *p;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>{</span><br><span class="line">    p = <span class="built_in">malloc</span>(<span class="number">7</span>);</span><br><span class="line">    p = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">~/tmp$ g++ -g -fsanitize=address -fno-omit-frame-pointer mem_leak.cpp -o main</span><br><span class="line">~/tmp$ ./main</span><br><span class="line"></span><br><span class="line">=================================================================</span><br><span class="line">==263==ERROR: LeakSanitizer: detected memory leaks</span><br><span class="line"></span><br><span class="line">Direct leak of 7 byte(s) <span class="keyword">in</span> 1 object(s) allocated from:</span><br><span class="line">    <span class="comment">#0 0x7f0d8e060c68 in __interceptor_malloc (/usr/lib/x86_64-linux-gnu/libasan.so.5+0x10bc68)</span></span><br><span class="line">    <span class="comment">#1 0x55748d544c32 in main /tmp/mem_leak.cpp:10</span></span><br><span class="line">    <span class="comment">#2 0x7f0d8d1c2c86 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21c86)</span></span><br><span class="line"></span><br><span class="line">SUMMARY: AddressSanitizer: 7 byte(s) leaked <span class="keyword">in</span> 1 allocation(s).</span><br></pre></td></tr></tbody></table></figure>
+
+
+        </div>
+
+        
+            <div class="post-copyright-info">
+                <div class="article-copyright-info-container">
+    <ul>
+        <li>本文标题：【转载】AddressSanitizer技术初体验</li>
+        <li>本文作者：wallace-lai</li>
+        <li>创建时间：2022-07-10 15:22:31</li>
+        <li>
+            本文链接：https://wallace-lai.github.io/2022/07/10/【转载】AddressSanitizer技术初体验/
+        </li>
+        <li>
+            版权声明：本博客所有文章除特别声明外，均采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">BY-NC-SA</a> 许可协议。转载请注明出处！
+        </li>
+    </ul>
+</div>
+
+            </div>
+        
+
+        
+            <ul class="post-tags-box">
+                
+                    <li class="tag-item">
+                        <a href="/tags/asan/">#asan</a>&nbsp;
+                    </li>
+                
+            </ul>
+        
+
+        
+            <div class="article-nav">
+                
+                
+                    <div class="article-next">
+                        <a class="next"
+                           rel="next"
+                           href="/2022/05/22/Ubuntu%E7%8E%AF%E5%A2%83%E4%B8%AD%E7%9A%84shell/"
+                        >
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">Ubuntu环境中的shell</span>
+                                <span class="post-nav-item">下一篇</span>
+                            </span>
+                            <span class="right arrow-icon flex-center">
+                              <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </a>
+                    </div>
+                
+            </div>
+        
+
+        
+    </div>
+</div>
+
+
+                
+            </div>
+
+        </div>
+
+        <div class="page-main-content-bottom">
+            <footer class="footer">
+    <div class="info-container">
+        <div class="copyright-info info-item">
+            &copy;
+            
+              <span>2022</span>
+              -
+            
+            2022&nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;<a href="/">wallace-lai</a>
+        </div>
+        
+        <div class="theme-info info-item">
+            由 <a target="_blank" href="https://hexo.io">Hexo</a> 驱动&nbsp;|&nbsp;主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep v3.4.5</a>
+        </div>
+        
+        
+    </div>
+</footer>
+
+        </div>
+    </div>
+
+    
+        <div class="post-tools">
+            <div class="post-tools-container">
+    <ul class="tools-list">
+        <!-- TOC aside toggle -->
+        
+            <li class="tools-item page-aside-toggle">
+                <i class="fas fa-outdent"></i>
+            </li>
+        
+
+        <!-- go comment -->
+        
+    </ul>
+</div>
+
+        </div>
+    
+
+    <div class="right-bottom-side-tools">
+        <div class="side-tools-container">
+    <ul class="side-tools-list">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <li class="tools-item tool-expand-width flex-center">
+            <i class="fas fa-arrows-alt-h"></i>
+        </li>
+
+        <li class="tools-item tool-dark-light-toggle flex-center">
+            <i class="fas fa-moon"></i>
+        </li>
+
+        <!-- rss -->
+        
+
+        
+            <li class="tools-item tool-scroll-to-top flex-center">
+                <i class="fas fa-arrow-up"></i>
+            </li>
+        
+
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list">
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+        
+    </ul>
+</div>
+
+    </div>
+
+    
+        <aside class="page-aside">
+            <div class="post-toc-wrap">
+    <div class="post-toc">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-text">使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E7%B1%BB%E5%9E%8B"><span class="nav-text">错误类型</span></a></li></ol>
+    </div>
+</div>
+        </aside>
+    
+
+    <div class="image-viewer-container">
+    <img src="">
+</div>
+
+
+    
+
+</main>
+
+
+
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/dark-light-toggle.js"></script>
+
+
+
+
+
+
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="post-scripts">
+    
+        
+<script src="/js/left-side-toggle.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+<script src="/js/toc.js"></script>
+
+    
+</div>
+
+
+
+</body>
+</html>
