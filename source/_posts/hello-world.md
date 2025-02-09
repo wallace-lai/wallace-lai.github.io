@@ -1,5 +1,6 @@
 ---
 title: 功能测试
+date: 2025-02-06 00:08:23
 index_img: /img/post/hexo-0.png
 ---
 
