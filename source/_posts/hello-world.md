@@ -1,5 +1,6 @@
 ---
 title: 功能测试
+index_img: /img/post/hexo-0.png
 ---
 
 # 一、hexo功能测试
